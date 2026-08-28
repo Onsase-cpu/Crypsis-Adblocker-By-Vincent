@@ -1,0 +1,21 @@
+import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const execFileAsync = promisify(execFile);
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const source = path.join(root, "extension");
+const releaseRoot = path.join(root, "release");
+const output = path.join(releaseRoot, "crypsis-extension");
+const brandIcon = "/home/ubuntu/webdev-static-assets/crypsis-extension-icon.png";
+await rm(output, { recursive: true, force: true }); await mkdir(releaseRoot, { recursive: true }); await cp(source, output, { recursive: true });
+if (!existsSync(brandIcon)) throw new Error("The Crypsis brand icon is not available yet. Run packaging again after image generation completes.");
+await mkdir(path.join(output, "icons"), { recursive: true }); await cp(brandIcon, path.join(output, "icons", "icon.png"));
+const manifestPath = path.join(output, "manifest.json"); const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+manifest.icons = { 16: "icons/icon.png", 32: "icons/icon.png", 48: "icons/icon.png", 128: "icons/icon.png" }; manifest.action.default_icon = { 16: "icons/icon.png", 32: "icons/icon.png", 48: "icons/icon.png", 128: "icons/icon.png" };
+await writeFile(manifestPath, JSON.stringify(manifest, null, 2) + "\n");
+const zipPath = path.join(releaseRoot, "crypsis-chrome-extension.zip"); await execFileAsync("zip", ["-qr", zipPath, "crypsis-extension"], { cwd: releaseRoot });
+console.log(`Extension release prepared at ${output}`); console.log(`Extension archive prepared at ${zipPath}`);
