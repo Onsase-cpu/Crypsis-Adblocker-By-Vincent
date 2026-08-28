@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Crypsis",
+  "description": "A focused ad and tracker blocker with per-site controls.",
+  "version": "1.0.0",
+  "minimum_chrome_version": "120",
+  "permissions": ["declarativeNetRequest", "declarativeNetRequestFeedback", "storage", "tabs"],
+  "host_permissions": ["<all_urls>"],
+  "background": {"service_worker": "background.js", "type": "module"},
+  "action": {"default_title": "Crypsis", "default_popup": "popup.html"},
+  "options_page": "options.html",
+  "declarative_net_request": {"rule_resources": [{"id": "core", "enabled": true, "path": "rules/core-rules.json"}]},
+  "content_scripts": [{"matches": ["http://*/*", "https://*/*"], "js": ["content-cleanup.js"], "run_at": "document_idle"}]
+}
